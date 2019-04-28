@@ -1,0 +1,62 @@
+---
+title: "Jennifer Deaton Assignment 12"
+output: html_notebook
+---
+
+#### 1). Create an object named “marriage” that only contains data from 2014 for participants who are married or who were once married. Be sure to drop unused factor levels.
+```{r}
+library(tidyverse)
+data <- gss_cat
+View(data)
+levels(data$marital)
+data$marital <- as.character.factor(data$marital)
+marriage <- data %>%
+  filter(year == 2014, marital != "Never married", marital != "No answer")
+marriage
+```
+
+#### 2). Provide a frequency table for the marriage data, sorted in descending order of frequency.
+```{r}
+library(dplyr)
+freq.marriage <- marriage %>% 
+  count(marital) %>% 
+  arrange(desc(n))
+freq.marriage
+```
+#### 3). Create a bar graph to illustrate the frequency distribution. Put the bars in ascending order, from left to right.
+```{r}
+marriage$marital <- fct_infreq(marriage$marital)
+marriage$marital <- fct_rev(marriage$marital)
+
+ggplot(marriage, aes(x = marital)) +
+  geom_bar() 
+```
+
+#### 4). Calculate the mean age for each level in the marriage data.
+```{r}
+marriage %>%
+  group_by(marital) %>%
+  summarize(age = mean(age, na.rm = TRUE))
+```
+#### 5). Construct a graph that shows income by age for each marital status category. On your graph, combine all non-income categories into one category called “Other.” Put this category at one end of the income axis on your graph. (10 points)
+```{r}
+levels(marriage$rincome)
+marriage %>% 
+  mutate(rincome = fct_collapse(rincome,
+                                Other = c("No answer", "Don't know", "Refused", 
+                                          "Not applicable"))) %>%
+  ggplot(aes(x = age, y = rincome, group = marital)) +
+  facet_wrap(vars(marital)) +
+  geom_point(aes(color = marital)) +
+  geom_jitter(aes(color = marital)) + 
+  labs(title = "Income by Age for Each Marital Category")
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
